@@ -1,61 +1,37 @@
 services:
   - type: web
-    name: limlink-backend
+    name: limlink-backend-token-claim1
     env: node
-    plan: free  # or 'starter' / 'standard' depending on your Render plan
-    region: oregon  # or 'frankfurt' if you're in EU
+    plan: free      # or 'starter' / 'standard' depending on your Render plan
+    region: oregon  # change to 'frankfurt' if in EU
+    branch: token_claim1
     buildCommand: "npm install"
     startCommand: "npm start"
-
-    # Auto-deploy when you push to main
     autoDeploy: true
-    branch: main
 
     envVars:
-      # Server
+      # Server port
       - key: PORT
-        value: 3000
+        value: 4000
 
-      # Admin
+      # Admin key for /api/admin/send-update
       - key: ADMIN_KEY
-        sync: false  # set in Render dashboard
+        sync: false
 
-      # Blockchain / Token
-      - key: PRIVATE_KEY
-        sync: false
-      - key: TOKEN_CONTRACT
-        sync: false
+      # Blockchain / LLNK
       - key: AMOY_RPC
         value: "https://rpc-amoy.polygon.technology"
+      - key: TOKEN_CONTRACT
+        sync: false
       - key: HOTWALLET_ADDRESS
         sync: false
 
-      # PayPal
-      - key: PAYPAL_CLIENT_ID
-        sync: false
-      - key: PAYPAL_CLIENT_SECRET
-        sync: false
-      - key: PAYPAL_ENV
-        value: "sandbox"
-
-      # Push Notifications
+      # Push notifications
       - key: PUBLIC_VAPID_KEY
         sync: false
       - key: PRIVATE_VAPID_KEY
         sync: false
 
-      # Email / SMTP
-      - key: SMTP_HOST
-        value: "smtp.llnklimited.com"
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_USER
-        value: "rick@llnklimited.com"
-      - key: SMTP_PASS
-        sync: false
-      - key: SMTP_FROM
-        value: "\"LimLink Notification\" <rick@llnklimited.com>"
-
-      # MongoDB (optional for future use)
+      # Optional MongoDB (reuse the same cluster as your other backend)
       - key: MONGO_URI
         sync: false
