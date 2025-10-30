@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LimLink Admin Dashboard</title>
+<style>
+  body {
+    background-color: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .admin-box {
+    background: #111;
+    border: 2px solid #28a745;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.3);
+  }
+  h1 { color: #28a745; text-align: center; margin-bottom: 20px; }
+  input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 5px;
+    border: none;
+    background: #222;
+    color: #fff;
+  }
+  button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: 100%;
+  }
+  button:hover {
+    background-color: #218838;
+  }
+  #result {
+    margin-top: 15px;
+    text-align: center;
+    color: #ffcc00;
+  }
+</style>
+</head>
+<body>
+
+<div class="admin-box">
+  <h1>LimLink Admin Broadcast</h1>
+  <p>Send push updates to all subscribers.</p>
+
+  <input type="password" id="adminKey" placeholder="Admin Key (required)" required>
+  <textarea id="message" placeholder="Enter your message..." rows="3" required></textarea>
+  <input type="url" id="url" placeholder="Optional: URL to open on click (e.g. https://limlink.tv/event)">
+  
+  <button id="sendBtn">Send Broadcast</button>
+  <p id="result"></p>
+</div>
+
+<script>
+document.getElementById('sendBtn').addEventListener('click', async () => {
+  const adminKey = document.getElementById('adminKey').value.trim();
+  const message = document.getElementById('message').value.trim();
+  const url = document.getElementById('url').value.trim();
+
+  if (!adminKey || !message) {
+    alert('Admin key and message are required.');
+    return;
+  }
+
+  const res = await fetch('/api/admin/send-update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ admin_key: adminKey, message, url })
+  });
+
+  const data = await res.json();
+  const resultEl = document.getElementById('result');
+  if (data.success) {
+    resultEl.textContent = '✅ Broadcast sent successfully!';
+    document.getElementById('message').value = '';
+  } else {
+    resultEl.textContent = '❌ ' + (data.error || 'Broadcast failed');
+  }
+});
+</script>
+
+</body>
+</html>

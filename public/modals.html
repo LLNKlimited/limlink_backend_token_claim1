@@ -1,0 +1,390 @@
+<!-- Load PayPal SDK -->
+<script src="https://www.sandbox.paypal.com/sdk/js?client-id=Aa-VE5KllrgnomBX_1l0MgPVMg7J32yELntbZ2PIhKBtp8EaWeEGrBK_ZKL_KX6a5tJk3zkCG4TU42_X&currency=USD"></script>
+
+<style>
+  /* Container for featured single: text left, art right, centered */
+  .featured-single-container {
+    display: flex;
+    justify-content: center; /* center horizontally on page */
+    align-items: center; /* vertically align text and art */
+    gap: 20px; /* space between text and art */
+    margin: 40px auto 30px auto;
+    max-width: 700px;
+  }
+  .featured-single-text {
+    color: #27C8F5;
+    font-family: 'Arial', sans-serif;
+    font-size: 1.5em;
+    white-space: nowrap; /* force one line */
+  }
+  .featured-single-art img {
+    width: 250px;
+    border-radius: 8px;
+    border: 3px solid #000;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  .featured-single-art img:hover {
+    transform: scale(1.03);
+  }
+
+  /* Music Player List Grid */
+  #MusicPlayerList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  .musicPlayer {
+    position: relative;
+    height: 250px;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    border: 2px solid #000;
+    border-radius: 8px;
+    transition: transform 0.2s;
+  }
+  .musicPlayer:hover {
+    transform: scale(1.03);
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    justify-content: center;
+    align-items: center;
+  }
+  .modalContent {
+    background-size: cover;
+    background-position: center;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    color: #fff;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+  }
+  .modalContent::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    z-index: 0;
+  }
+  .modalContent > * {
+    position: relative;
+    z-index: 1;
+  }
+  .promoInput {
+    margin-top: 10px;
+    padding: 8px;
+    width: 100%;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  .closeModal {
+    margin-top: 15px;
+    background: #222;
+    color: white;
+    padding: 6px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+</style>
+<!-- Heading -->
+<h2 style="color: #27C8F5; text-align: center; font-family: 'Arial', sans-serif; margin-bottom: 20px;">
+  For Kick Ass Rock n Roll, Dial it in, Right Here.
+</h2>
+<!-- Featured New Single (side by side text and cover art) -->
+<div class="featured-single-container">
+  <div class="featured-single-text">
+    🎧 Featured: New Single
+  </div>
+  <div class="featured-single-art">
+  <img
+    src="https://www.lightninstik.com/wp-content/downloads/protectedmusic/PlayThatKickAss.png"
+    alt="Play That Kick Ass Cover"
+    onclick="openModalFeatured()"
+  />
+</div>
+
+</div>
+
+<!-- Music Player List Container -->
+<div id="MusicPlayerList"></div>
+
+<!-- Modal -->
+<div id="previewModal" class="modal">
+  <div class="modalContent" id="modalContentBox">
+    <h3 id="modalSongTitle"></h3>
+    <audio id="modalAudio" controls loop style="width: 100%; margin-top: 10px;"></audio>
+
+    <input type="text" id="promoCodeInput" class="promoInput" placeholder="Enter Promo Code (optional)">
+    <input type="email" id="buyerEmailInput" class="promoInput" placeholder="Enter Your Email" required>
+
+    <div id="paypal-button-container" style="margin-top: 10px;"></div>
+
+    <button class="closeModal" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+  // Featured Song Data
+  const featuredSong = {
+    name: 'Play That Kick Ass', src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/PlayThatKickAss.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/PlayThatKickAss.png' };
+
+function openModalFeatured() {
+  const modal = document.getElementById('previewModal');
+  const modalBox = document.getElementById('modalContentBox');
+
+  document.getElementById('modalSongTitle').textContent = featuredSong.name;
+  const audio = document.getElementById('modalAudio');
+  audio.src = featuredSong.src;
+  audio.load();
+  audio.play();
+
+  document.getElementById('promoCodeInput').value = '';
+  document.getElementById('buyerEmailInput').value = '';
+  modalBox.style.backgroundImage = `url('${featuredSong.background}')`;
+  modal.style.display = 'flex';
+
+  const paypalContainer = document.getElementById('paypal-button-container');
+  paypalContainer.innerHTML = '';
+
+  paypal.Buttons({
+    createOrder: function(data, actions) {
+      const email = document.getElementById('buyerEmailInput').value.trim();
+      if (!email || !email.includes('@')) {
+        alert("Please enter a valid email address.");
+        throw new Error("Invalid email");
+      }
+      return actions.order.create({
+        purchase_units: [{
+          description: featuredSong.name,
+          amount: { value: '1.00' }
+        }]
+      });
+    },
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+        const promo = encodeURIComponent(document.getElementById('promoCodeInput').value.trim());
+        const email = encodeURIComponent(document.getElementById('buyerEmailInput').value.trim());
+        const songParam = encodeURIComponent(featuredSong.name);
+        window.location.href = `/download-confirmation/?song=${songParam}&promo=${promo}&email=${email}`;
+      });
+    }
+  }).render('#paypal-button-container');
+}
+
+
+  // Music List Array
+const musicList = [
+  {
+    order: 1,
+    name: 'Betcha Know',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/BetchaKnow.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/BetchaKnow.png'
+  },
+  {
+    order: 2,
+    name: 'She Hocs To It',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/SheHocsToIt.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/SheHocsToIt.png'
+  },
+  {
+    order: 3,
+    name: 'Crush',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/Crush.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/Crush.png'
+  },
+  {
+    order: 4,
+    name: 'Pinky Truce',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/PinkyTruce.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/PinkyTruce.png'
+  },
+  {
+    order: 5,
+    name: "Won't Need You No More",
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/WontNeedYouNoMore.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/WontNeedYouNoMore.png'
+  },
+  {
+    order: 6,
+    name: "A Soul's Divide",
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/ASoulsDivide.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/ASoulsDivide.png'
+  },
+  {
+    order: 7,
+    name: 'You Know You Love Me',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/YouKnowYouLoveMe.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/YouKnowYouLoveMe.png'
+  },
+  {
+    order: 8,
+    name: 'It Never Rains',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/ItNeverRains.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/ItNeverRains.png'
+  },
+  {
+    order: 9,
+    name: 'In Front of Me',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/InFrontOfMe.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/InFrontOfMe.png'
+  },
+  {
+    order: 10,
+    name: 'Unrequited',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/Unrequited.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/Unrequited.png'
+  },
+  {
+    order: 11,
+    name: 'Them Ol Lies',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/ThemOlLies.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/ThemOlLies.png'
+  },
+  {
+    order: 12,
+    name: 'No Greater Feeling',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/NoGreaterFeeling.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/NoGreaterFeeling.png'
+  },
+  {
+    order: 13,
+    name: 'Wash Her Sadness',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/WashHerSadness.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/WashHerSadness.png'
+  },
+  {
+    order: 14,
+    name: 'Clever Design',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/CleverDesign.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/CleverDesign.png'
+  },
+  {
+    order: 15,
+    name: 'Bent Over You',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/BentOverYou.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/BentOverYou.png'
+  },
+  {
+    order: 16,
+    name: 'Rockstar Beautiful',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/RockstarBeautiful.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/RockstarBeautiful.png'
+  },
+  {
+    order: 17,
+    name: 'Got No Dice',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/GotNoDice.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/GotNoDice.png'
+  },
+  {
+    order: 18,
+    name: 'Little Pigs Laughing',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/LittlePigsLaughing.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/LittlePigsLaughing.png'
+  },
+  {
+    order: 19,
+    name: 'LIVE The Jack',
+    src: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/LIVETheJack.wav',
+    background: 'https://www.lightninstik.com/wp-content/downloads/protectedmusic/LIVETheJack.png'
+  }
+];
+
+  // Generate music grid and add click event to open modal
+  const musicListDiv = document.getElementById('MusicPlayerList');
+
+  musicList.forEach(song => {
+    const div = document.createElement('div');
+    div.className = 'musicPlayer';
+    div.style.backgroundImage = `url('${song.background}')`;
+    div.title = song.name;
+    div.onclick = () => openSongModal(song);
+    musicListDiv.appendChild(div);
+  });
+
+  function openSongModal(song) {
+    const modal = document.getElementById('previewModal');
+    const modalBox = document.getElementById('modalContentBox');
+
+    document.getElementById('modalSongTitle').textContent = song.name;
+    const audio = document.getElementById('modalAudio');
+    audio.src = song.src;
+    audio.load();
+    audio.play();
+
+    document.getElementById('promoCodeInput').value = '';
+    document.getElementById('buyerEmailInput').value = '';
+    modalBox.style.backgroundImage = `url('${song.background}')`;
+    modal.style.display = 'flex';
+
+    // Clear previous PayPal button
+    const paypalContainer = document.getElementById('paypal-button-container');
+    paypalContainer.innerHTML = '';
+
+<div id="llnk-button-container" style="margin-top: 10px;">
+  <button onclick="buyWithLLNK()" style="background-color:#27C8F5;color:#fff;border:none;padding:10px 15px;border-radius:6px;cursor:pointer;">
+    Buy with LLNK
+  </button>
+</div>
+
+    // Render PayPal button
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        const email = document.getElementById('buyerEmailInput').value.trim();
+        if (!email || !email.includes('@')) {
+          alert("Please enter a valid email address.");
+          throw new Error("Invalid email");
+        }
+        return actions.order.create({
+          purchase_units: [{
+            description: song.name,
+            amount: { value: '1.00' }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          const promo = encodeURIComponent(document.getElementById('promoCodeInput').value.trim());
+          const email = encodeURIComponent(document.getElementById('buyerEmailInput').value.trim());
+          const songParam = encodeURIComponent(song.name);
+
+          window.location.href = `/download-confirmation/?song=${songParam}&promo=${promo}&email=${email}`;
+        });
+      }
+    }).render('#paypal-button-container');
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('previewModal');
+    const audio = document.getElementById('modalAudio');
+    audio.pause();
+    audio.currentTime = 0;
+    modal.style.display = 'none';
+  }
+
+  // Close modal if clicking outside modal content
+  window.onclick = function(event) {
+    const modal = document.getElementById('previewModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  };
+</script>

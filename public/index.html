@@ -1,0 +1,45 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Buy Media Access</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="box">
+    <h1>Purchase Access</h1>
+    <p>Select payment method:</p>
+
+    <button id="paypalBtn">💵 Pay with PayPal</button>
+    <button id="llnkBtn">🪙 Pay with LLNK</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script src="/js/purchase.js"></script>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Claim LLNK Tokens</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="claim-box">
+    <h1>Claim Your LLNK Tokens</h1>
+    <input type="text" id="txn_id" placeholder="PayPal Transaction ID">
+    <input type="text" id="wallet_address" placeholder="Your Wallet Address">
+    <input type="email" id="email" placeholder="Optional Email for Receipt">
+    <button id="claimBtn">Claim Tokens</button>
+    <p id="result"></p>
+  </div>
+
+  <script src="/js/claim.js"></script>
+</body>
+</html>
