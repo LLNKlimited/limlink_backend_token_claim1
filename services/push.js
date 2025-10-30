@@ -34,5 +34,3 @@ async function sendPushNotification(message, url = '/') {
 }
 
 module.exports = { saveSubscription, sendPushNotification };
-
-
