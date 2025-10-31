@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { sendPushNotification } = require('../services/push');
+const { sendPushNotification } = require('./services/push');
 
 // POST /api/admin/send-update
 router.post('/send-update', async (req, res) => {
